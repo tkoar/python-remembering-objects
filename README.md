@@ -2,55 +2,287 @@
 # Python Remembering Objects Lab
 
 ## Introduction
-Okay, we have done a good amount of work with classes and instances. At this point we are able to successfully define all kinds of classes and instance methods. We can initialize instance objects and operate on them until the cows come home. However, we haven't really thought about we keep track of all these instance objects yet. Seems like an important piece of the puzzle on our road to Object Oriented Python mastery, right? That's right! The next time we create a Person class and want to keep track of all these people, or as we like to call them person instance objects, we will be able to! We will explore using Python's class methods and class variables in order to **remember** the instance objects a class instantiates.
+Okay, we have done a good amount of work with classes and instances. At this point we are able to successfully define all kinds of classes and instance methods. We can initialize instance objects and operate on them until the cows come home. However, we haven't totally been designing our classes to keep track of all these instance objects. That seems like an important piece of the puzzle on our road to Object Oriented Python mastery, right? That's right! We will explore using Python's class methods and class variables in order to **remember** *all* of the instance objects a class instantiates.
 
 ## Objectives
-* Understand how classes remember, or store, the instance objects they instantiate
-* Practice using class methods and class variables to persist instance objects produced by a class
+* Understanding why we need to Persist all of our class's instance objects 
+* Learn to use class methods and class variables to persist and access instance objects produced by a class
+* Operate on each isntance object created by a class
 
-## Instructions
+## Why Persist *All* Instance Objects 
 
-Let's take for example a car manufacturer. Cars are created with a `make`, `model`, and `color`. We could think of all types of questions we might want to ask about the collection of cars we manufacture. What model car did we produce the most? What color car is currently trending? Or even more straight forward, how many of a certain model car have we produced? How would our classes know how to answer these very difficult questions without being able to recall all car instance objects it has ever created? 
+Let's take for example a car manufacturer. Cars are created with a `make`, `model`, and `color`. We could think of all types of questions we might want to ask about the collection of cars we manufacture. What model car did we produce the most? What color car is currently trending? Or even more straight forward, how many of a certain model car have we produced? How would our classes know how to answer these very difficult questions without being able to recall each car instance object it has created? 
 
-To start, we will define a Car class that can instantiate cars instances with the instance variables `_make`, `_model`, and a `_color`. We won't need to change the make or model of a car after its created because we can't do that in the real world, but we might want to alter the color, which is possible. So, let's define instance methods to read (get) all three attributes and an instance method to write (set) the color of a car.
+To start, we will define a Car class that can instantiate car instances with the instance variables `_make`, `_model`, and `_color`. We won't need to change the make or model of a car after its created because we can't do that in the real world, but we might want to alter the color, which is possible. So, let's define instance methods to read (get) all three attributes and an instance method to write (set) the color of a car.
 
-> **note:** remember to load the autoreload extension from IPython
+
 ```python
-%load_ext autoreload
-%autoreload 2
+class Car:
+    
+    def __init__(self, make, model, color):
+        self._make = make
+        self._model = model        
+        self._color = color
+    
+    @property
+    def make(self):
+        return self._make
+    
+    @property
+    def model(self):
+        return self._model
+    
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, new_color):
+        self._color = new_color
+        return self._color
+    
 ```
 
 
 ```python
-from car import Car
+# Here we are creating some jeeps -- 13 to be exact.
+# We are using some lists with data describing different jeeps
+# to create a new list of car instance objects.
+# Run this cell to see a list of all the car instance objects we are creating below
+
+def make_cars():
+    manufacturer = "Jeep"
+    models = ["Wrangler", "Grand Cherokee", "Cherokee", "Compass"]
+    colors = ['green', 'red', 'blue', 'grey']
+    num_each_model_to_make = [1, 4, 5, 3]
+    index = 0
+
+    for num in num_each_model_to_make:
+        for i in list(range(num)):
+            car = Car(manufacturer, models[index], colors[index])
+            print(vars(car))
+        index += 1
+        
+make_cars()
+```
+
+    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+
+
+## How to Persist Each New Car Instance Object
+
+Okay, we have all of our shiny new jeeps displayed in some beautiful dictionary notation above. How can we, **without looking at the code above**, know how many blue cars have been made? Maybe a bit more interesting of an insight, how can we know what the distribution of models manufactured is? Well, put simply, we can't. These cars are being created and promptly pushed into a black hole, never to be seen or heard from again. :( 
+
+So, how do we fix this? Well, using our knowledge of class variables, we can create a class variable called **`_all`**  for our classes that points to a list, which is where we will append each of our new instance objects. That way, we will have a way to always access each instance object we've ever made in a particular class.
+
+Let's try it out with our car class.
+
+
+```python
+class Car:
+    
+    _all = []
+    
+    def __init__(self, make, model, color):
+        self._make = make
+        self._model = model        
+        self._color = color
+        self.save()
+        
+    @classmethod
+    def all(cls):
+        return cls._all
+        
+    def save(self):
+        Car.all().append(self)
+    
+    @property
+    def make(self):
+        return self._make
+    
+    @property
+    def model(self):
+        return self._model
+    
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, new_color):
+        self._color = new_color
+        return self._color
 ```
 
 
 ```python
-new_car = Car("Jeep", "Grand Cherokee", "Green")
-new_car
+print(len(Car.all()))
+make_cars()
+print(len(Car.all()))
 ```
+
+    0
+    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    13
+
+
+Awesome! Now our class is using a class variable to keep track of all these new car instance objects. 
+
+Let's unpack what is happening above. We have basically our same class as we had when we started, but we've added three (3) things. The first thing we added was our class variable `_all`. This is our list that we use to hold all of our car instance objects. Second we have our class method `all` that returns the class variable, `_all`. Alright, those both seem very straightforward. We are using our class method to return the class variable, just as we do with our instance variables and instance methods. 
+
+Now, the third thing we've changed about our class is we have added an instance method called `save` which we call on our instance object in our `__init__` method. The `save` method simply calls the class method `all()` to return the class variable `_all`, and it appends the instance object, `self`, to our class variable `_all`. 
+
+As always, we try to name our instance and class variables and methods so that they describe what they are or what they do. The naming convention for a class variable that keeps track of all instance objects of that class is `_all`, and the convention for accessing that variable is by defining a class method that returns that class variable. The naming convention for an instance method that *persists* or adds an instance to our program's memory, is `save`. 
+
+To sum up, now when we initialize a new isntance object, we are saving it by calling the instance method `save` and then adding it to our class variable, `_all`.
+
+## Operating on `_all` Instance Objects
+
+Now that we know how to save and access each of our instance objects, let's see how we can really use this information. We mentioned wanting to know the most popular color for a Jeep or what the distribution is like for each model that is manufactured by Jeep. Well, let's check it out!
+
+We are going to follow best practices and create a method *inside* our class to answer these questions. Since this is a question about the class as a whole, we will be making class methods to answer these questions.
 
 
 ```python
-# oh no! we wanted a blue car. let's change the color:
-new_car.color = "Blue"
-new_car.color # Blue
+class Car:
+    
+    _all = []
+    
+    def __init__(self, make, model, color):
+        self._make = make
+        self._model = model        
+        self._color = color
+        self.save()
+        
+    @classmethod
+    def all(cls):
+        return cls._all
+        
+    def save(self):
+        Car.all().append(self)
+    
+    @property
+    def make(self):
+        return self._make
+    
+    @property
+    def model(self):
+        return self._model
+    
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, new_color):
+        self._color = new_color
+        return self._color
+    
+    @classmethod
+    def most_popular_color(cls):
+        color_histogram = {}
+        most_popular_color = ""
+        num_cars = 0
+        for car in cls.all():
+            if not car.color in color_histogram:
+                color_histogram[car.color] = 1
+            else:
+                color_histogram[car.color] += 1
+        for key, value in color_histogram.items():
+            if num_cars < value:
+                most_popular_color = key
+                num_cars = value
+        return most_popular_color
+    
+    @classmethod
+    def make_histogram_of_models(cls):
+        model_histogram = {}
+        for car in cls.all():
+            if not car.model in model_histogram:
+                model_histogram[car.model] = 1
+            else:
+                model_histogram[car.model] += 1
+        return model_histogram
+
+make_cars()
 ```
 
-Great! Now, to remember the instances of a class and keep them in one place, we will use a list. Let's define a class variable called `_all` and assign it to an empty list.
+    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
+
 
 
 ```python
-Car._all # []
+Car.most_popular_color()
 ```
 
-Then, let's write a class method with the `@classmethod` decorator and name it `save`. Remember, in order to reference the class, we use the parametere `cls` in our method definition in place of `self`. The `save` class method will also need to know what it is saving, so, the second argument will be the instance object we are appending to our `_all` list. Once the instance object is added to our list, it should return the newly updated `_all` list.
+
+
+
+    'blue'
+
+
 
 
 ```python
-Car.save(new_car) # [<__main__.Car object at 0x1068dd7f0>]
+import plotly as py
+import plotly.graph_objs as go
+
+car_histogram = Car.make_histogram_of_models()
+py.offline.init_notebook_mode(connected=True)
+
+py.offline.iplot(
+    [go.Bar(
+        x = list(car_histogram.keys()),
+        y = list(car_histogram.values())
+    )]
+)
 ```
+
+
+<script>requirejs.config({paths: { 'plotly': ['https://cdn.plot.ly/plotly-latest.min']},});if(!window.Plotly) {{require(['plotly'],function(plotly) {window.Plotly=plotly;});}}</script>
+
+
+
+<div id="b7849099-1f2c-4d86-8624-e5cb4b78f20b" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("b7849099-1f2c-4d86-8624-e5cb4b78f20b", [{"type": "bar", "x": ["Wrangler", "Grand Cherokee", "Cherokee", "Compass"], "y": [1, 4, 5, 3]}], {}, {"showLink": true, "linkText": "Export to plot.ly"})});</script>
+
 
 ## Summary
 
+
+In this lab, we practiced creating a
