@@ -66,21 +66,6 @@ def make_cars():
 make_cars()
 ```
 
-    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-
-
 ## How to Persist Each New Car Instance Object
 
 Okay, we have all of our shiny new jeeps displayed in some beautiful dictionary notation above. How can we, **without looking at the code above**, know how many blue cars have been made? Maybe a bit more interesting of an insight, how can we know what the distribution of models manufactured is? Well, put simply, we can't. These cars are being created and promptly pushed into a black hole, never to be seen or heard from again. :( 
@@ -132,23 +117,6 @@ print(len(Car.all()))
 make_cars()
 print(len(Car.all()))
 ```
-
-    0
-    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    13
-
 
 Awesome! Now our class is using a class variable to keep track of all these new car instance objects. 
 
@@ -231,32 +199,10 @@ class Car:
 make_cars()
 ```
 
-    {'_make': 'Jeep', '_model': 'Wrangler', '_color': 'green'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Grand Cherokee', '_color': 'red'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Cherokee', '_color': 'blue'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-    {'_make': 'Jeep', '_model': 'Compass', '_color': 'grey'}
-
-
 
 ```python
 Car.most_popular_color()
 ```
-
-
-
-
-    'blue'
-
-
 
 
 ```python
@@ -266,23 +212,16 @@ import plotly.graph_objs as go
 car_histogram = Car.make_histogram_of_models()
 py.offline.init_notebook_mode(connected=True)
 
-py.offline.iplot(
-    [go.Bar(
-        x = list(car_histogram.keys()),
-        y = list(car_histogram.values())
-    )]
-)
+trace = {
+    'type': "bar", 
+    'x': list(car_histogram.keys()), 
+    'y': list(car_histogram.values())
+}
+
+py.offline.iplot({'data': [trace]})
 ```
-
-
-<script>requirejs.config({paths: { 'plotly': ['https://cdn.plot.ly/plotly-latest.min']},});if(!window.Plotly) {{require(['plotly'],function(plotly) {window.Plotly=plotly;});}}</script>
-
-
-
-<div id="b7849099-1f2c-4d86-8624-e5cb4b78f20b" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("b7849099-1f2c-4d86-8624-e5cb4b78f20b", [{"type": "bar", "x": ["Wrangler", "Grand Cherokee", "Cherokee", "Compass"], "y": [1, 4, 5, 3]}], {}, {"showLink": true, "linkText": "Export to plot.ly"})});</script>
-
 
 ## Summary
 
 
-In this lab, we practiced creating a
+In this lab, we introduced using the class variable `_all` to create a single reference to all intance objects of a class. We then introduced the Python conventions for accessing this list of instance objects by using a class method, `all`, and using an instance method, `save` to append instance objects to the `_all` list. These conventions ensure a clear and concise understanding of common operations that are performed in Object Oriented Python Programs. Once we have our classes set up in this fashion, we can then focus on doing some more interesting things like creating class methods to return the most popular attribute value like **color** for all cars, or even plot the distribution of instance objects based on those values. 
